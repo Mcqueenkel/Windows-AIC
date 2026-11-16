@@ -20,16 +20,19 @@ account rotates through many in-game accounts with Data Link, and for each accou
 **2. Download this project:** on GitHub, **Code > Download ZIP**, then unzip it, for
 example to `C:\aic`.
 
-**3. Put your own files in that folder** (they are private, so they are not in the download):
+**3. Add the `vendor` folder** so you have `C:\aic\vendor\`. It is the game client, and it
+is not in the download (its licence does not allow sharing it publicly): get it from
+whoever shared this farm with you.
 
-| Put this | here | What it is |
-|---|---|---|
-| `vendor` folder | `C:\aic\vendor\` | the game client, from your private backup |
-| `reroll_accounts.json` | `C:\aic\` | your accounts, see [Accounts](#accounts) |
-| `support_list.json`, `chara_list.json`, `succession_relation.json`, `succession_relation_member.json` | `C:\aic\gamedata\data\` | game data, from your game-data backup |
+**4. Get your accounts ready.** For every in-game account you want farmed, you need:
 
-**4. Double-click `setup.bat`** and follow it. It checks your files, installs what it needs,
-opens your settings in Notepad and tests everything. Then it does the two logins, once:
+- its **Trainer ID**, shown on the in-game profile;
+- a **Link Password**, which you set in the game under **Data Link**.
+
+**5. Double-click `setup.bat`** and follow it. It installs what it needs and opens two files
+in Notepad: your settings (paste a Discord webhook if you have one) and your account list
+(put your Trainer IDs and Link Passwords in place of the examples). It reads the game data
+from your installed game, tests everything, then does the two logins, once:
 
 - the game starts so its login can be read; click past the title screen if it stops there;
 - it asks for the Steam account name, password and Steam Guard code.
@@ -52,7 +55,8 @@ skips everything that is already done.
 - **Change settings or accounts:** edit `aic.env` or `reroll_accounts.json` in Notepad, then
   restart the farm.
 - **Game update:** the farm switches to the new version by itself. Open the game once so it
-  downloads the update, then restart the farm.
+  downloads the update, close the farm, run `setup.bat` again (it reads the new cards from
+  the game) and start the farm.
 - **Steam login expired** (the log shows 391, 394 or Steam Guard errors): open PowerShell in
   the folder and run `.venv\Scripts\python scripts\steam_login.py`.
 
@@ -126,6 +130,6 @@ instead of the ZIP.)
 | `state\default\logs\aic.log` | what the farm is doing; crashes go to `farm-stderr.log` next to it |
 | `runtime\default\auth_config.json` | game login + Steam login token |
 | `state\` | the farm's memory: fans per day, Ace/club state, Link Passwords it has used |
-| `gamedata\` | game data and the Steam library |
+| `gamedata\` | game data (setup reads it from the game) and the Steam library |
 
 How it works under the hood: [docs/REFERENCE.md](docs/REFERENCE.md).
