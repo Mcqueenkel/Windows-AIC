@@ -1,0 +1,3 @@
+# Windows-only project: batch files need CRLF, everything else is normalised.
+* text=auto
+*.bat text eol=crlf

@@ -1,0 +1,13 @@
+# Python 3.12 (not newer: these pinned versions predate 3.13).
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\pip install -r requirements.txt
+curl_cffi==0.7.4
+msgpack==1.1.0
+pycryptodome==3.14.1
+
+# For `account.bat capture` (reading auth_config.json off the game).
+frida==17.17.0
+
+# Also required: Node.js 20 + steam-user 5.3.0 for Steam session tickets
+#   npm install --prefix gamedata steam-user@5.3.0
+#   npm install --prefix vendor steam-user@5.3.0
