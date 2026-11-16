@@ -1,103 +1,64 @@
 # AutoIndependentCareer for Windows (`aic`)
 
-Farms **Umamusume: Pretty Derby** (Global, Steam) on autopilot from a Windows PC. One Steam
+Farms **Umamusume: Pretty Derby** (Global, Steam) on autopilot from your PC. One Steam
 account rotates through many in-game accounts with Data Link, and for each account the farm:
 
 - ends the finished Auto Training (idle) career and starts the next one (Unity Cup by default);
 - stops the account for the day once it has gained 28M fans (the game day resets at 15:00 UTC);
 - does the daily chores: gift box, club shoe requests and donations, Team Trials, daily races
   and Ace Runs;
-- posts every finished career (fans, carats) to Discord.
+- posts every finished career (fans, carats) to Discord, if you give it a webhook.
 
-## Requirements
+## Setup
 
-- Windows 10 or 11, on and awake around the clock
-- [Python 3.12](https://www.python.org/downloads/) and [Node.js 20](https://nodejs.org/)
-- The game installed through Steam
-- One Steam account that owns the game; the farm signs in with it
-- A Data Link (Trainer ID + Link Password) for every in-game account you want farmed
-- Optional: a Discord webhook for career reports and alerts
+**1. Install these programs** (once):
 
-**Files to bring** (none of them are in this repository):
+- [Python 3.12](https://www.python.org/downloads/)
+- [Node.js](https://nodejs.org/) (the LTS version)
+- Steam, with the game installed and the farm's Steam account signed in
 
-| File | Where it goes |
-|---|---|
-| `vendor\` (the game client, from your private backup) | `vendor\` |
-| `reroll_accounts.json`, see [Roster](#roster) | the project folder |
-| game data: `support_list.json`, `chara_list.json`, `succession_relation.json`, `succession_relation_member.json` | `gamedata\data\` |
+**2. Download this project:** on GitHub, **Code > Download ZIP**, then unzip it, for
+example to `C:\aic`.
 
-## Install
+**3. Put your own files in that folder** (they are private, so they are not in the download):
 
-In PowerShell:
+| Put this | here | What it is |
+|---|---|---|
+| `vendor` folder | `C:\aic\vendor\` | the game client, from your private backup |
+| `reroll_accounts.json` | `C:\aic\` | your accounts, see [Accounts](#accounts) |
+| `support_list.json`, `chara_list.json`, `succession_relation.json`, `succession_relation_member.json` | `C:\aic\gamedata\data\` | game data, from your game-data backup |
 
-```powershell
-git clone https://github.com/Mcqueenkel/Windows-AIC.git aic
-cd aic                                   # copy vendor\, reroll_accounts.json and gamedata\data\ in here
-py -3.12 -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-npm install --prefix gamedata steam-user@5.3.0
-npm install --prefix vendor steam-user@5.3.0
-```
+**4. Double-click `setup.bat`** and follow it. It checks your files, installs what it needs,
+opens your settings in Notepad and tests everything. Then it does the two logins, once:
 
-**1. Capture the game login (once).** Starts the game and reads the login off it into
-`runtime\default\auth_config.json`:
+- the game starts so its login can be read; click past the title screen if it stops there;
+- it asks for the Steam account name, password and Steam Guard code.
 
-```powershell
-.\account.bat capture
-```
+At the end it offers to start the farm every time you sign in, to keep the PC awake, and
+to start the farm now. Say yes to all three.
 
-**2. Settings.** Paste your Discord webhook(s) in, or delete those two lines:
+If setup stops, it says what is wrong. Fix that and double-click `setup.bat` again: it
+skips everything that is already done.
 
-```powershell
-copy aic.env.example aic.env
-notepad aic.env
-```
+## Using it
 
-**3. Run the tests.** Every line should say `ok`:
+- **The farm** is the `farm.bat` window. Leave it open (minimized is fine). It restarts by
+  itself if something crashes.
+- **What is it doing?** Open `state\default\logs\aic.log` in Notepad. The newest lines are
+  at the bottom.
+- **Stop or restart:** close the farm window, best while the log's last line says
+  `Next visit in ...`. Start it again by double-clicking `farm.bat`. Careers keep running on
+  the game server while it is closed.
+- **Change settings or accounts:** edit `aic.env` or `reroll_accounts.json` in Notepad, then
+  restart the farm.
+- **Game update:** the farm switches to the new version by itself. Open the game once so it
+  downloads the update, then restart the farm.
+- **Steam login expired** (the log shows 391, 394 or Steam Guard errors): open PowerShell in
+  the folder and run `.venv\Scripts\python scripts\steam_login.py`.
 
-```powershell
-$env:PYTHONUTF8 = 1; Get-ChildItem tests\test_*.py | ForEach-Object {
-  .venv\Scripts\python $_.FullName *> $null; if ($LASTEXITCODE) { "FAIL $($_.Name)" } else { "ok   $($_.Name)" } }
-```
+## Accounts
 
-**4. Steam login (once).** Asks for the Steam account name, its password and a Steam Guard
-code, then stores a refresh token, so the farm never needs them again. It ends with
-`STEAM TOKEN STORED`:
-
-```powershell
-.venv\Scripts\python scripts\steam_login.py
-```
-
-**5. Start the farm.** Double-click `farm.bat`, or:
-
-```powershell
-.\farm.bat
-```
-
-Within a minute the log (see [Day to day](#day-to-day)) shows `=== visit 1 | ...`, then
-`Transfer accepted` and `Independent training started`.
-
-**6. Keep it running.**
-
-```powershell
-# start it, minimized, whenever you sign in
-$s = (New-Object -ComObject WScript.Shell).CreateShortcut("$([Environment]::GetFolderPath('Startup'))\aic farm.lnk")
-$s.TargetPath = "$PWD\farm.bat"; $s.WorkingDirectory = "$PWD"; $s.WindowStyle = 7; $s.Save()
-
-powercfg /change standby-timeout-ac 0    # a sleeping PC farms nothing
-
-# optional: the wedged-farm alert every 30 minutes (put your alert webhook in)
-$a = New-ScheduledTaskAction -Execute "$PWD\.venv\Scripts\pythonw.exe" -WorkingDirectory "$PWD" `
-  -Argument "scripts\health_alert.py --webhook https://discord.com/api/webhooks/<id>/<token>"
-Register-ScheduledTask "aic health" -Action $a `
-  -Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 30))
-```
-
-After a reboot the farm starts again once you sign in to Windows.
-
-## Roster
-
-`reroll_accounts.json` has one entry per account:
+`reroll_accounts.json` lists the accounts to farm, one line each:
 
 ```json
 [
@@ -115,15 +76,13 @@ After a reboot the farm starts again once you sign in to Windows.
 | `ace_once` | optional: do only this many Ace Runs, then leave the rotation |
 | `club` | optional: `false` if the account is not in the farm's club, so the club chores are skipped |
 
-The farm only reads the roster when it starts, so restart it once after an edit.
-
 ## Settings
 
-**`aic.env`** (template: `aic.env.example`):
+`aic.env` (setup makes it from `aic.env.example`). `1` = on, `0` = off:
 
-| Key | Template value | Meaning |
+| Setting | Default | Meaning |
 |---|---|---|
-| `AIC_CHORES` | `1` | daily chores on/off |
+| `AIC_CHORES` | `1` | daily chores |
 | `AIC_CLUB_EVERY` | `60` | seconds between club visits per account |
 | `AIC_ACE` | `1` | Ace Runs: 5 per account per week (resets Monday 15:00 UTC) |
 | `AIC_TEAM` | `1` | Team Trials battles |
@@ -132,53 +91,41 @@ The farm only reads the roster when it starts, so restart it once after an edit.
 | `AIC_FAN_TARGET` | `28000000` | fans per account per game day, then that account waits for the reset |
 | `AIC_FAN_STOP_MARGIN` | `0` | stop this many fans before the target |
 | `AIC_VISIT_JITTER_MIN` / `_MAX` | `0` | random extra wait between visits, in minutes |
-| `AIC_CAREER_WEBHOOK` | | Discord webhook for finished careers |
-| `AIC_ALERT_WEBHOOK` | | Discord webhook for health alerts |
-| `AIC_MASTER_MDB` | | only if the game is not in `C:\Program Files (x86)\Steam`: the path to its `master.mdb` |
+| `AIC_CAREER_WEBHOOK` | empty | Discord webhook for finished careers |
+| `AIC_ALERT_WEBHOOK` | empty | Discord webhook for "the farm is stuck" alerts (see below) |
+| `AIC_MASTER_MDB` | | only if the game is not in `C:\Program Files (x86)\Steam`: the full path to its `master.mdb` |
 
-**`farm.bat`** holds the career options on its `rotate_cli.py run` line: `--scenario 2`
-(Unity Cup; 1 = URA, 3 = Grand Concert, 4 = Trackblazer), the fan races to enter, TP
-refills and the auto-built fan-bonus deck.
+The career options (`--scenario 2` = Unity Cup; 1 = URA, 3 = Grand Concert, 4 = Trackblazer,
+the fan races, TP refills, the fan-bonus deck) are on the long line in `farm.bat`.
 
-## Day to day
+## Optional: an alert when the farm is stuck
 
-```powershell
-Get-Content state\default\logs\aic.log -Tail 20 -Wait    # what it is doing
-```
-
-Close the log window when done: while it is open Windows cannot rotate the log at 20 MB.
-If the farm crashes, the error is in `state\default\logs\farm-stderr.log` and in the farm
-window, and it restarts by itself 5 minutes later.
-
-- **Restart** (to apply a settings, roster or code change): close the farm window while the
-  log's last line is `Next visit in ...`, so no visit is cut off, then start `farm.bat` again.
-- **Game update:** the farm notices (API error 204), reads the new version from Steam and
-  switches by itself. It reads `master.mdb` straight from the game folder, so open the game
-  once to download the new one, then restart the farm.
-- **Steam token expired** (the log shows 391/394 or Steam Guard errors): run step 4 again.
-
-## Updating the code
-
-At a gap (`Next visit in ...`), close the farm window, then:
+Checks the log every 30 minutes and posts to Discord if the farm stopped making progress.
+Run this once in PowerShell, in the folder, with your alert webhook in place of the example:
 
 ```powershell
-git pull
+$a = New-ScheduledTaskAction -Execute "$PWD\.venv\Scripts\pythonw.exe" -WorkingDirectory "$PWD" `
+  -Argument "scripts\health_alert.py --webhook https://discord.com/api/webhooks/<id>/<token>"
+Register-ScheduledTask "aic health" -Action $a `
+  -Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 30))
 ```
 
-Run the tests (step 3). All `ok`? Start `farm.bat` again. A `FAIL`? Go back with
-`git reset --keep HEAD@{1}` and start `farm.bat`. Careers keep running on the game server while
-the farm is closed.
+## Updating
+
+Close the farm window, download the new ZIP and unzip it over your folder (choose
+**Replace**). Your own files are not in the ZIP, so they stay. Then double-click
+`setup.bat`: it installs anything new and tests it. (Used `git clone`? Then `git pull`
+instead of the ZIP.)
 
 ## Where things live
 
 | Path | What |
 |---|---|
 | `aic.env` | settings and webhooks |
-| `reroll_accounts.json` | the roster |
-| `runtime\default\auth_config.json` | game login + Steam refresh token |
-| `state\default\` | `logs\aic.log`, the fan/carat/Ace/club day state, card inventories |
-| `state\accounts.json` | Link Passwords the farm has used |
-| `gamedata\` | game data: `data\*.json`, `node_modules` |
+| `reroll_accounts.json` | your accounts |
+| `state\default\logs\aic.log` | what the farm is doing; crashes go to `farm-stderr.log` next to it |
+| `runtime\default\auth_config.json` | game login + Steam login token |
+| `state\` | the farm's memory: fans per day, Ace/club state, Link Passwords it has used |
+| `gamedata\` | game data and the Steam library |
 
-How it works under the hood (the game API, selection rules, the measurements behind the
-defaults): [docs/REFERENCE.md](docs/REFERENCE.md).
+How it works under the hood: [docs/REFERENCE.md](docs/REFERENCE.md).
