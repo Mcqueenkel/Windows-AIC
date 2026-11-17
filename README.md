@@ -13,7 +13,8 @@ account rotates through many in-game accounts with Data Link, and for each accou
 
 **1. Install these programs** (once):
 
-- [Python 3.12](https://www.python.org/downloads/)
+- [Python 3.12](https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe) (this
+  link: the newest Python on python.org's front page is too new for the farm)
 - [Node.js](https://nodejs.org/) (the LTS version)
 - Steam, with the game installed and the farm's Steam account signed in
 

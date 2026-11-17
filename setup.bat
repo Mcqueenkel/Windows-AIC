@@ -14,7 +14,8 @@ if exist "%PY%" goto :python_ok
 set "PYV="
 for %%v in (3.12 3.11 3.10) do if not defined PYV py -%%v -c "" >nul 2>&1 && set "PYV=%%v"
 if defined PYV goto :python_ok
-echo   Python 3.12 is not installed. Get it from https://www.python.org/downloads/
+echo   Python 3.12 is not installed (a newer Python does not work). Get it here:
+echo   https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe
 goto :fail
 :python_ok
 where node >nul 2>&1 && goto :node_ok
