@@ -4,10 +4,6 @@ __pycache__/
 .pytest_cache/
 *.log
 
-# --- Third-party code (proprietary licence - no redistribution) ---------------
-# uma_api, career_bot and the Frida agent; copy vendor/ in from your private backup.
-vendor/
-
 # --- Runtime state: accounts, Link Passwords, Steam/auth tokens, logs -------
 state/
 runtime/
@@ -17,6 +13,7 @@ steam_auth_data/
 trace_logs/
 dumps/
 node_modules/
+vendor/package*.json
 gamedata/
 .venv/
 venv/

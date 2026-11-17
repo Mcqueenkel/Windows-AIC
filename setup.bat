@@ -9,7 +9,7 @@ set "PYTHONUTF8=1"
 set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\aic farm.lnk"
 
 echo.
-echo [1/8] Checking Python, Node.js and the game client
+echo [1/8] Checking Python and Node.js
 if exist "%PY%" goto :python_ok
 set "PYV="
 for %%v in (3.12 3.11 3.10) do if not defined PYV py -%%v -c "" >nul 2>&1 && set "PYV=%%v"
@@ -21,12 +21,6 @@ where node >nul 2>&1 && goto :node_ok
 echo   Node.js is not installed. Get the LTS version from https://nodejs.org/
 goto :fail
 :node_ok
-if exist "vendor\uma_api\client.py" goto :vendor_ok
-echo   The vendor folder is missing. It is the game client, and it is not in the
-echo   download: get it from whoever shared this farm with you and put it here:
-echo   %CD%\vendor
-goto :fail
-:vendor_ok
 echo   ok
 
 echo.
@@ -83,7 +77,7 @@ echo [7/8] Self-test
 set "FAILED="
 for %%t in (tests\test_*.py) do "%PY%" "%%t" >nul 2>&1 || (set "FAILED=1" & echo   FAIL %%t)
 if not defined FAILED goto :tests_ok
-echo   Some tests failed. Check that your vendor folder is complete.
+echo   Some tests failed. Download the ZIP again in case a file is missing.
 goto :fail
 :tests_ok
 echo   ok

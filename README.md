@@ -20,16 +20,12 @@ account rotates through many in-game accounts with Data Link, and for each accou
 **2. Download this project:** on GitHub, **Code > Download ZIP**, then unzip it, for
 example to `C:\aic`.
 
-**3. Add the `vendor` folder** so you have `C:\aic\vendor\`. It is the game client, and it
-is not in the download (its licence does not allow sharing it publicly): get it from
-whoever shared this farm with you.
-
-**4. Get your accounts ready.** For every in-game account you want farmed, you need:
+**3. Get your accounts ready.** For every in-game account you want farmed, you need:
 
 - its **Trainer ID**, shown on the in-game profile;
 - a **Link Password**, which you set in the game under **Data Link**.
 
-**5. Double-click `setup.bat`** and follow it. It installs what it needs and opens two files
+**4. Double-click `setup.bat`** and follow it. It installs what it needs and opens two files
 in Notepad: your settings (paste a Discord webhook if you have one) and your account list
 (put your Trainer IDs and Link Passwords in place of the examples). It reads the game data
 from your installed game, tests everything, then does the two logins, once:
